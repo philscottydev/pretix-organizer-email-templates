@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pretix-organizer-email-templates"
+version = "1.1.0"
+description = "Organizer-level email content template management for pretix"
+requires-python = ">=3.11"
+dependencies = ["pretix>=2026.2.0"]
+
+[project.entry-points."pretix.plugin"]
+pretix_organizeremailtemplates = "pretix_organizeremailtemplates:PluginApp"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["pretix_organizeremailtemplates*"]

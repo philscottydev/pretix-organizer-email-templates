@@ -1,0 +1,3 @@
+recursive-include pretix_organizeremailtemplates/templates *
+recursive-include pretix_organizeremailtemplates/static *
+global-exclude *.pyc

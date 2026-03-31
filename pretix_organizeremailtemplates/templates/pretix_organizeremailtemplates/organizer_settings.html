@@ -1,0 +1,74 @@
+{% extends "pretixcontrol/organizers/base.html" %}
+{% load i18n %}
+{% load bootstrap3 %}
+{% block title %}{% trans "Organizer Email Templates" %}{% endblock %}
+{% block inner %}
+    <h1>{% trans "Organizer Email Templates" %}</h1>
+
+    <p class="help-block">
+        {% blocktrans trimmed %}
+            These templates are used by all events that have their email content locked to organizer level.
+            Set subject lines and body text for each email type below. Leave fields blank to use pretix defaults.
+        {% endblocktrans %}
+    </p>
+
+    <form action="" method="post" class="form-horizontal" mail-preview-url="{{ mail_preview_url }}">
+        {% csrf_token %}
+        {% bootstrap_form_errors form %}
+
+        <div class="tabbed-form">
+            <fieldset>
+                <legend>{% trans "Email Templates" %}</legend>
+
+                <div class="panel-group" id="email_templates_group">
+
+                    {% blocktrans asvar title_placed_order %}Placed order{% endblocktrans %}
+                    {% include "pretixcontrol/event/mail_settings_fragment.html" with pid="org_order_placed" title=title_placed_order items="emailtemplates_subject_order_placed,emailtemplates_text_order_placed" exclude="" %}
+
+                    {% blocktrans asvar title_paid_order %}Paid order{% endblocktrans %}
+                    {% include "pretixcontrol/event/mail_settings_fragment.html" with pid="org_order_paid" title=title_paid_order items="emailtemplates_subject_order_paid,emailtemplates_text_order_paid" exclude="" %}
+
+                    {% blocktrans asvar title_free_order %}Free order{% endblocktrans %}
+                    {% include "pretixcontrol/event/mail_settings_fragment.html" with pid="org_order_free" title=title_free_order items="emailtemplates_subject_order_free,emailtemplates_text_order_free" exclude="" %}
+
+                    {% blocktrans asvar title_resend_link %}Resend link{% endblocktrans %}
+                    {% include "pretixcontrol/event/mail_settings_fragment.html" with pid="org_resend_link" title=title_resend_link items="emailtemplates_subject_resend_link,emailtemplates_text_resend_link" exclude="" %}
+
+                    {% blocktrans asvar title_order_changed %}Order changed{% endblocktrans %}
+                    {% include "pretixcontrol/event/mail_settings_fragment.html" with pid="org_order_changed" title=title_order_changed items="emailtemplates_subject_order_changed,emailtemplates_text_order_changed" exclude="" %}
+
+                    {% blocktrans asvar title_payment_reminder %}Payment reminder{% endblocktrans %}
+                    {% include "pretixcontrol/event/mail_settings_fragment.html" with pid="org_order_expire_warning" title=title_payment_reminder items="emailtemplates_subject_order_expire_warning,emailtemplates_text_order_expire_warning" exclude="" %}
+
+                    {% blocktrans asvar title_payment_failed %}Payment failed{% endblocktrans %}
+                    {% include "pretixcontrol/event/mail_settings_fragment.html" with pid="org_payment_failed" title=title_payment_failed items="emailtemplates_subject_order_payment_failed,emailtemplates_text_order_payment_failed" exclude="" %}
+
+                    {% blocktrans asvar title_waiting_list %}Waiting list notification{% endblocktrans %}
+                    {% include "pretixcontrol/event/mail_settings_fragment.html" with pid="org_waiting_list" title=title_waiting_list items="emailtemplates_subject_waiting_list,emailtemplates_text_waiting_list" exclude="" %}
+
+                    {% blocktrans asvar title_order_canceled %}Order canceled{% endblocktrans %}
+                    {% include "pretixcontrol/event/mail_settings_fragment.html" with pid="org_order_canceled" title=title_order_canceled items="emailtemplates_subject_order_canceled,emailtemplates_text_order_canceled" exclude="" %}
+
+                    {% blocktrans asvar title_order_custom_mail %}Order custom mail{% endblocktrans %}
+                    {% include "pretixcontrol/event/mail_settings_fragment.html" with pid="org_custom_mail" title=title_order_custom_mail items="emailtemplates_subject_order_custom_mail,emailtemplates_text_order_custom_mail" exclude="" %}
+
+                    {% blocktrans asvar title_download_reminder %}Download reminder{% endblocktrans %}
+                    {% include "pretixcontrol/event/mail_settings_fragment.html" with pid="org_download_reminder" title=title_download_reminder items="emailtemplates_subject_download_reminder,emailtemplates_text_download_reminder" exclude="" %}
+
+                    {% blocktrans asvar title_order_approved %}Order approved{% endblocktrans %}
+                    {% include "pretixcontrol/event/mail_settings_fragment.html" with pid="org_order_approved" title=title_order_approved items="emailtemplates_subject_order_approved,emailtemplates_text_order_approved" exclude="" %}
+
+                    {% blocktrans asvar title_order_denied %}Order denied{% endblocktrans %}
+                    {% include "pretixcontrol/event/mail_settings_fragment.html" with pid="org_order_denied" title=title_order_denied items="emailtemplates_subject_order_denied,emailtemplates_text_order_denied" exclude="" %}
+
+                </div>{# /panel-group #}
+            </fieldset>
+        </div>{# /tabbed-form #}
+
+        <div class="form-group submit-group">
+            <button type="submit" class="btn btn-primary btn-save">
+                {% trans "Save" %}
+            </button>
+        </div>
+    </form>
+{% endblock inner %}
