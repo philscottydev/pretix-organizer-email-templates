@@ -14,6 +14,7 @@ class PluginApp(PluginConfig):
         version = '1.1.0'
         category = 'CUSTOMIZATION'
         level = PLUGIN_LEVEL_EVENT_ORGANIZER_HYBRID
+        compatibility = "pretix>=2026.2.0"
         visible = True
 
     def ready(self):

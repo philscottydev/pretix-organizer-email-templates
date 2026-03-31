@@ -1,0 +1,4 @@
+[plugin]
+package = "pretix-organizer-email-templates"
+modules = [ "pretix_organizeremailtemplates" ]
+marketplace_name = "organizer-email-templates"

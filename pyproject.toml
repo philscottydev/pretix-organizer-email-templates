@@ -1,17 +1,41 @@
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = ["setuptools", "pretix-plugin-build"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "pretix-organizer-email-templates"
-version = "1.1.0"
-description = "Organizer-level email content template management for pretix"
+dynamic = ["version"]
+description = "Organizer-level email content template management for pretix with per-event lock/unlock"
+readme = "README.rst"
 requires-python = ">=3.11"
-dependencies = ["pretix>=2026.2.0"]
+license = {file = "LICENSE"}
+keywords = ["pretix"]
+authors = [
+    {name = "Phil Scott"},
+]
+maintainers = [
+    {name = "Phil Scott"},
+]
+dependencies = [
+    "pretix>=2026.2.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/philscottydev/pretix-organizer-email-templates"
+"Bug Tracker" = "https://github.com/philscottydev/pretix-organizer-email-templates/issues"
 
 [project.entry-points."pretix.plugin"]
 pretix_organizeremailtemplates = "pretix_organizeremailtemplates:PluginApp"
 
+[project.entry-points."distutils.commands"]
+build = "pretix_plugin_build.build:CustomBuild"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.dynamic]
+version = {attr = "pretix_organizeremailtemplates.__version__"}
+
 [tool.setuptools.packages.find]
-where = ["."]
-include = ["pretix_organizeremailtemplates*"]
+include = ["pretix*"]
+namespaces = false
