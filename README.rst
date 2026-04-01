@@ -122,6 +122,20 @@ Released under the terms of the Apache License 2.0.
 Changelog
 ---------
 
+v1.3.0 (2026-04-01)
+~~~~~~~~~~~~~~~~~~~~
+
+* **Reverse banner on native email settings page** — when email content is
+  *not* locked and the organizer has templates configured, a yellow
+  ``alert-warning`` banner now appears on pretix's native
+  *Settings → Email* page. The banner ("Email content is managed per-event")
+  explains that organizer-level templates are available and offers two buttons:
+  *Lock to Organizer Templates* (locks immediately via ``GET ?action=lock``)
+  and *View Organizer Templates* (opens organizer settings in a new tab).
+* **GET ``?action=lock`` support in ``EventEmailContentView``** — mirrors the
+  existing ``GET ?action=unlock`` shortcut so the banner button can trigger a
+  lock without a full form POST.
+
 v1.2.0 (2026-04-01)
 ~~~~~~~~~~~~~~~~~~~~
 

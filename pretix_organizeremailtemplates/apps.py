@@ -15,7 +15,7 @@ class PluginApp(PluginConfig):
         name = _('Organizer Email Templates')
         author = 'Phil Scott'
         description = _('Organizer-level email content template management with per-event lock/unlock')
-        version = '1.2.0'
+        version = '1.3.0'
         category = 'CUSTOMIZATION'
         level = PLUGIN_LEVEL_EVENT_ORGANIZER_HYBRID
         compatibility = "pretix>=2026.2.0"

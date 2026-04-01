@@ -219,6 +219,15 @@ class EventEmailContentView(EventSettingsViewMixin, EventSettingsFormView):
         return False
 
     def get(self, request, *args, **kwargs):
+        if request.GET.get('action') == 'lock':
+            for email_type, _label in EMAIL_TYPES:
+                subject_key, text_key = MAIL_KEY_MAP[email_type]
+                request.event.settings.delete(subject_key)
+                request.event.settings.delete(text_key)
+            request.event.settings.set('emailtemplates_content_locked', True)
+            request.event.settings.flush()
+            messages.success(request, _('Email content has been locked to organizer templates.'))
+            return redirect(self.get_success_url())
         # Allow the lock-banner "Unlock for This Event" link to trigger unlock via GET
         if request.GET.get('action') == 'unlock':
             org_settings = request.organizer.settings

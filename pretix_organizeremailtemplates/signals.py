@@ -53,69 +53,86 @@ def nav_event_settings_receiver(sender, request=None, **kwargs):
 
 @receiver(html_page_start, dispatch_uid='organizeremailtemplates_html_page_start')
 def inject_lock_banner(sender, **kwargs):
-    """
-    Inject a lock-status banner at the top of the native email settings page when
-    email content is locked to organizer level for this event.
-    """
     request = sender
 
-    # Only on event pages
     if not hasattr(request, 'event'):
         return ''
-
-    # Only on the native email settings page (path ends with /settings/email)
     if not request.path_info.endswith('/settings/email'):
         return ''
-
-    # Only when the plugin is active for this event
     if 'pretix_organizeremailtemplates' not in request.event.plugins:
         return ''
 
-    # Only when content is locked
     is_locked = bool(request.event.settings.get('emailtemplates_content_locked', as_type=bool))
-    if not is_locked:
-        return ''
-
-    # Only when organizer actually has templates set (otherwise the lock is meaningless)
-    if not _organizer_has_templates(request.organizer):
-        return ''
-
     organizer_url = reverse(
         'plugins:pretix_organizeremailtemplates:organizer.settings',
         kwargs={'organizer': request.organizer.slug},
     )
-    unlock_url = reverse(
+    event_settings_url = reverse(
         'plugins:pretix_organizeremailtemplates:event.settings',
         kwargs={'organizer': request.organizer.slug, 'event': request.event.slug},
-    ) + '?action=unlock'
+    )
 
-    return mark_safe(format_html(
-        '''
-        <div class="alert alert-info alert-dismissible" role="alert" style="margin-bottom:20px;">
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-            <h4><i class="fa fa-lock"></i> {heading}</h4>
-            <p>{body}</p>
-            <p>
-                <a href="{organizer_url}" class="btn btn-sm btn-default" target="_blank">
-                    <i class="fa fa-external-link"></i> {btn_organizer}
-                </a>
-                &nbsp;
-                <a href="{unlock_url}" class="btn btn-sm btn-warning">
-                    <i class="fa fa-unlock"></i> {btn_unlock}
-                </a>
-            </p>
-        </div>
-        ''',
-        heading=_('Email content is managed at organizer level'),
-        body=_('This event inherits email templates from the organizer. '
-               'Changes made on this page will be ignored while content is locked.'),
-        organizer_url=organizer_url,
-        btn_organizer=_('Go to Organizer Email Templates'),
-        unlock_url=unlock_url,
-        btn_unlock=_('Unlock for This Event'),
-    ))
+    if is_locked and _organizer_has_templates(request.organizer):
+        # LOCKED banner (existing)
+        return mark_safe(format_html(
+            '''
+            <div class="alert alert-info alert-dismissible" role="alert" style="margin-bottom:20px;">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4><i class="fa fa-lock"></i> {heading}</h4>
+                <p>{body}</p>
+                <p>
+                    <a href="{organizer_url}" class="btn btn-sm btn-default" target="_blank">
+                        <i class="fa fa-external-link"></i> {btn_organizer}
+                    </a>
+                    &nbsp;
+                    <a href="{unlock_url}" class="btn btn-sm btn-warning">
+                        <i class="fa fa-unlock"></i> {btn_unlock}
+                    </a>
+                </p>
+            </div>
+            ''',
+            heading=_('Email content is managed at organizer level'),
+            body=_('This event inherits email templates from the organizer. '
+                   'Changes made on this page will be ignored while content is locked.'),
+            organizer_url=organizer_url,
+            unlock_url=event_settings_url + '?action=unlock',
+            btn_organizer=_('Go to Organizer Email Templates'),
+            btn_unlock=_('Unlock for This Event'),
+        ))
+
+    if not is_locked and _organizer_has_templates(request.organizer):
+        # UNLOCKED banner (new) — suggest organizer templates are available
+        return mark_safe(format_html(
+            '''
+            <div class="alert alert-warning alert-dismissible" role="alert" style="margin-bottom:20px;">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4><i class="fa fa-unlock"></i> {heading}</h4>
+                <p>{body}</p>
+                <p>
+                    <a href="{lock_url}" class="btn btn-sm btn-primary">
+                        <i class="fa fa-lock"></i> {btn_lock}
+                    </a>
+                    &nbsp;
+                    <a href="{organizer_url}" class="btn btn-sm btn-default" target="_blank">
+                        <i class="fa fa-external-link"></i> {btn_organizer}
+                    </a>
+                </p>
+            </div>
+            ''',
+            heading=_('Email content is managed per-event'),
+            body=_('Organizer-level email templates are available. '
+                   'You can lock this event to use them instead of the per-event settings below.'),
+            lock_url=event_settings_url + '?action=lock',
+            organizer_url=organizer_url,
+            btn_lock=_('Lock to Organizer Templates'),
+            btn_organizer=_('View Organizer Templates'),
+        ))
+
+    return ''
 
 
 def _organizer_has_templates(organizer):
