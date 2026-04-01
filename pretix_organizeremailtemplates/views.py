@@ -103,6 +103,26 @@ class OrganizerEmailTemplatesView(OrganizerSettingsFormView):
             kwargs={'organizer': self.request.organizer.slug},
         )
 
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        self._propagate_to_locked_events()
+        return response
+
+    def _propagate_to_locked_events(self):
+        """After organizer templates are saved, update mail_* keys on all locked events."""
+        from django_scopes import scope
+        from pretix.base.models import Event
+        from .forms import apply_organizer_templates_to_event
+        with scope(organizer=self.request.organizer):
+            locked_events = Event.objects.filter(organizer=self.request.organizer)
+            for event in locked_events:
+                if 'pretix_organizeremailtemplates' not in event.plugins:
+                    continue
+                if not bool(event.settings.get('emailtemplates_content_locked', as_type=bool)):
+                    continue
+                apply_organizer_templates_to_event(self.request.organizer, event)
+                logger.debug('organizeremailtemplates: propagated template update to locked event %s', event.slug)
+
 
 class OrganizerEmailTemplatesPreview(OrganizerPermissionRequiredMixin, View):
     """
@@ -220,10 +240,8 @@ class EventEmailContentView(EventSettingsViewMixin, EventSettingsFormView):
 
     def get(self, request, *args, **kwargs):
         if request.GET.get('action') == 'lock':
-            for email_type, _label in EMAIL_TYPES:
-                subject_key, text_key = MAIL_KEY_MAP[email_type]
-                request.event.settings.delete(subject_key)
-                request.event.settings.delete(text_key)
+            from .forms import apply_organizer_templates_to_event
+            apply_organizer_templates_to_event(request.organizer, request.event)
             request.event.settings.set('emailtemplates_content_locked', True)
             request.event.settings.flush()
             messages.success(request, _('Email content has been locked to organizer templates.'))
@@ -249,10 +267,8 @@ class EventEmailContentView(EventSettingsViewMixin, EventSettingsFormView):
         action = request.POST.get('action')
 
         if action == 'lock':
-            for email_type, _label in EMAIL_TYPES:
-                subject_key, text_key = MAIL_KEY_MAP[email_type]
-                request.event.settings.delete(subject_key)
-                request.event.settings.delete(text_key)
+            from .forms import apply_organizer_templates_to_event
+            apply_organizer_templates_to_event(request.organizer, request.event)
             request.event.settings.set('emailtemplates_content_locked', True)
             request.event.settings.flush()
             messages.success(request, _('Email content has been locked to organizer templates.'))

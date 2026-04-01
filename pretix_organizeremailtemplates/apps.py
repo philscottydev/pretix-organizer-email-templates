@@ -15,7 +15,7 @@ class PluginApp(PluginConfig):
         name = _('Organizer Email Templates')
         author = 'Phil Scott'
         description = _('Organizer-level email content template management with per-event lock/unlock')
-        version = '1.3.0'
+        version = '1.4.0'
         category = 'CUSTOMIZATION'
         level = PLUGIN_LEVEL_EVENT_ORGANIZER_HYBRID
         compatibility = "pretix>=2026.2.0"
@@ -30,28 +30,25 @@ class PluginApp(PluginConfig):
         If the organizer has opted in to auto-lock new events and has templates
         configured, delete any event-level mail_* keys and set the lock flag.
         """
-        from .forms import MAIL_KEY_MAP
         auto_lock = event.organizer.settings.get(
             'emailtemplates_auto_lock_new_events', as_type=bool
         )
         if not auto_lock:
             return
 
+        from .forms import apply_organizer_templates_to_event, EMAIL_TYPES
         # Check organizer actually has at least one template configured
         organizer = event.organizer
         has_templates = any(
             organizer.settings.get('emailtemplates_subject_%s' % et)
             or organizer.settings.get('emailtemplates_text_%s' % et)
-            for et in MAIL_KEY_MAP
+            for et, _label in EMAIL_TYPES
         )
         if not has_templates:
             return
-
-        for subject_key, text_key in MAIL_KEY_MAP.values():
-            event.settings.delete(subject_key)
-            event.settings.delete(text_key)
+        apply_organizer_templates_to_event(event.organizer, event)
         event.settings.set('emailtemplates_content_locked', True)
-        event.settings.flush()
+        # flush is called inside apply_organizer_templates_to_event
         logger.debug(
             'organizeremailtemplates: auto-locked event %s on plugin install', event.slug
         )

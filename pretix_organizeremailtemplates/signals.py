@@ -151,7 +151,7 @@ def on_event_copy_data(sender, other, **kwargs):
     sender = new event, other = source event.
     If source was locked, apply auto-lock to the new event too.
     """
-    from .forms import MAIL_KEY_MAP
+    from .forms import apply_organizer_templates_to_event, EMAIL_TYPES
     source_locked = bool(other.settings.get('emailtemplates_content_locked', as_type=bool))
     if not source_locked:
         return
@@ -160,13 +160,11 @@ def on_event_copy_data(sender, other, **kwargs):
     has_templates = any(
         organizer.settings.get('emailtemplates_subject_%s' % et)
         or organizer.settings.get('emailtemplates_text_%s' % et)
-        for et in MAIL_KEY_MAP
+        for et, _label in EMAIL_TYPES
     )
     if not has_templates:
         return
-    for subject_key, text_key in MAIL_KEY_MAP.values():
-        sender.settings.delete(subject_key)
-        sender.settings.delete(text_key)
+    apply_organizer_templates_to_event(sender.organizer, sender)
     sender.settings.set('emailtemplates_content_locked', True)
-    sender.settings.flush()
+    # flush is called inside apply_organizer_templates_to_event
     logger.debug('organizeremailtemplates: auto-locked cloned event %s', sender.slug)

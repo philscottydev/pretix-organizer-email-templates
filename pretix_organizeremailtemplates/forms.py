@@ -71,6 +71,27 @@ _ORGANIZER_PLACEHOLDER_HELP = format_placeholders_help_text(
 )
 
 
+def apply_organizer_templates_to_event(organizer, event):
+    """
+    Copy organizer emailtemplates_* values into event mail_* keys so pretix's
+    mail service picks them up. Call this whenever an event is locked or when
+    organizer templates are updated.
+    """
+    for email_type, _label in EMAIL_TYPES:
+        subject_key, text_key = MAIL_KEY_MAP[email_type]
+        org_subject = organizer.settings.get('emailtemplates_subject_%s' % email_type)
+        org_text = organizer.settings.get('emailtemplates_text_%s' % email_type)
+        if org_subject:
+            event.settings.set(subject_key, org_subject)
+        else:
+            event.settings.delete(subject_key)
+        if org_text:
+            event.settings.set(text_key, org_text)
+        else:
+            event.settings.delete(text_key)
+    event.settings.flush()
+
+
 def _build_organizer_fields():
     """Return a dict of field definitions for OrganizerEmailTemplatesForm."""
     fields = {}

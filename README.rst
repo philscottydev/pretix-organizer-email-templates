@@ -122,6 +122,20 @@ Released under the terms of the Apache License 2.0.
 Changelog
 ---------
 
+v1.4.0 (2026-04-01)
+~~~~~~~~~~~~~~~~~~~~
+
+* **Bug fix (critical):** Locked events now correctly receive organizer email
+  templates in outgoing emails. Previously, locking deleted event ``mail_*``
+  keys expecting hierarkey cascade from the organizer — but the organizer only
+  stores templates under ``emailtemplates_*`` keys, so pretix fell back to
+  built-in defaults. Lock now copies organizer templates directly into the
+  event's ``mail_*`` keys.
+* Organizer template saves now automatically propagate updated templates to
+  all currently-locked events.
+* All lock entry points fixed: lock POST, lock GET, ``installed()`` hook,
+  and ``event_copy_data`` signal.
+
 v1.3.0 (2026-04-01)
 ~~~~~~~~~~~~~~~~~~~~
 
