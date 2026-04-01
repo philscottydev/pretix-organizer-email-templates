@@ -6,6 +6,7 @@ from django.utils.html import escape, format_html
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
+from pretix.base.signals import event_copy_data
 from pretix.control.signals import html_page_start, nav_event_settings, nav_organizer
 
 logger = logging.getLogger(__name__)
@@ -125,3 +126,30 @@ def _organizer_has_templates(organizer):
         if organizer.settings.get('emailtemplates_text_%s' % email_type):
             return True
     return False
+
+
+@receiver(event_copy_data, dispatch_uid='organizeremailtemplates_event_copy_data')
+def on_event_copy_data(sender, other, **kwargs):
+    """
+    sender = new event, other = source event.
+    If source was locked, apply auto-lock to the new event too.
+    """
+    from .forms import MAIL_KEY_MAP
+    source_locked = bool(other.settings.get('emailtemplates_content_locked', as_type=bool))
+    if not source_locked:
+        return
+    # Only lock if organizer has templates
+    organizer = sender.organizer
+    has_templates = any(
+        organizer.settings.get('emailtemplates_subject_%s' % et)
+        or organizer.settings.get('emailtemplates_text_%s' % et)
+        for et in MAIL_KEY_MAP
+    )
+    if not has_templates:
+        return
+    for subject_key, text_key in MAIL_KEY_MAP.values():
+        sender.settings.delete(subject_key)
+        sender.settings.delete(text_key)
+    sender.settings.set('emailtemplates_content_locked', True)
+    sender.settings.flush()
+    logger.debug('organizeremailtemplates: auto-locked cloned event %s', sender.slug)

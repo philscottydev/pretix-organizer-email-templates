@@ -22,6 +22,13 @@ Features
 * Edit/Preview tabs and clickable placeholder insertion buttons (same UI as
   pretix's native email settings)
 * AJAX preview for organizer-level templates
+* **Auto-lock on activation** — when an organizer enables the plugin on a new
+  event, the event is automatically locked to organizer templates if the
+  *Auto-lock new events* setting is enabled and organizer templates exist
+* **Auto-lock propagation on clone** — when a locked event is cloned, the new
+  event inherits the locked state automatically
+* **"Auto-lock new events" setting** — per-organizer checkbox on the
+  organizer templates form to control the auto-lock-on-activation behaviour
 
 
 How it works
@@ -110,6 +117,35 @@ License
 Copyright 2026 Phil Scott
 
 Released under the terms of the Apache License 2.0.
+
+
+Changelog
+---------
+
+v1.2.0 (2026-04-01)
+~~~~~~~~~~~~~~~~~~~~
+
+* **Auto-lock on plugin activation** — ``PluginApp.installed()`` now reads the
+  new ``emailtemplates_auto_lock_new_events`` organizer setting and, when
+  enabled and organizer templates exist, automatically locks the event to use
+  organizer templates the moment the plugin is enabled on it.
+* **Auto-lock propagation on event clone** — new ``on_event_copy_data``
+  receiver on the ``event_copy_data`` signal: if the source event was locked,
+  the cloned event is locked to organizer templates as well.
+* **"Auto-lock new events" checkbox** — new ``emailtemplates_auto_lock_new_events``
+  boolean field in ``OrganizerEmailTemplatesForm``, stored in
+  ``organizer.settings``, gives organizers per-organizer control over the
+  auto-lock behaviour.
+
+v1.1.0 (2026-03-31)
+~~~~~~~~~~~~~~~~~~~~
+
+* Initial public release.
+* Organizer-level email template management for all 13 pretix email types.
+* Per-event lock/unlock mechanism using hierarkey cascade.
+* Lock status banner injected on pretix's native email settings page.
+* Multi-language support and pre-fill from pretix built-in defaults.
+* Edit/Preview tabs, placeholder insertion buttons, and AJAX preview.
 
 
 .. _pretix: https://github.com/pretix/pretix

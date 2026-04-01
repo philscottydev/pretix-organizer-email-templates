@@ -98,6 +98,13 @@ class OrganizerEmailTemplatesForm(SettingsForm):
     which locales the organizer has globally enabled.
     """
 
+    emailtemplates_auto_lock_new_events = forms.BooleanField(
+        required=False,
+        label=_('Automatically lock email content on newly activated events'),
+        help_text=_('When this plugin is enabled on a new event, its email content will '
+                    'automatically be locked to use these organizer templates.'),
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for name, field in _build_organizer_fields().items():
