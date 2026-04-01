@@ -26,6 +26,8 @@ gh release create vX.Y.Z --title "vX.Y.Z" --notes "## Changes\n- ..." --latest
 ### 5. Reinstall on server
 ```bash
 sudo -u pretix /var/pretix/venv/bin/pip install -e /var/pretix-plugins/pretix-organizer-email-templates/
+# Remove ~retix artifact: pip leaves this behind on editable re-installs (first char replaced with ~)
+rm -rf /var/pretix/venv/lib/python3.12/site-packages/~retix_organizer_email_templates-*.dist-info
 systemctl restart pretix-web pretix-worker
 ```
 
