@@ -103,9 +103,12 @@ class OrganizerEmailTemplatesView(OrganizerSettingsFormView):
             kwargs={'organizer': self.request.organizer.slug},
         )
 
-    def form_valid(self, form):
-        response = super().form_valid(form)
-        self._propagate_to_locked_events()
+    def post(self, request, *args, **kwargs):
+        # OrganizerSettingsFormView.post() calls form.save() + redirect() directly,
+        # bypassing form_valid(). We override post() to propagate after a successful save.
+        response = super().post(request, *args, **kwargs)
+        if response.status_code == 302:
+            self._propagate_to_locked_events()
         return response
 
     def _propagate_to_locked_events(self):

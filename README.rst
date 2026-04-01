@@ -122,6 +122,14 @@ Released under the terms of the Apache License 2.0.
 Changelog
 ---------
 
+v1.5.0 (2026-04-01)
+~~~~~~~~~~~~~~~~~~~~
+
+* **Bug fix:** Organizer template changes now immediately propagate to all
+  locked events. Previously, ``form_valid()`` was overridden but
+  ``OrganizerSettingsFormView.post()`` bypasses ``form_valid()`` entirely,
+  so propagation never ran. Fixed by overriding ``post()`` instead.
+
 v1.4.0 (2026-04-01)
 ~~~~~~~~~~~~~~~~~~~~
 
